@@ -18,8 +18,8 @@ export function AddPointForm({
   handleSubmit,
 }: AddPointFormProps) {
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-      <div className="grid grid-cols-2 gap-3">
+    <form className="flex flex-col gap-4 px-6" onSubmit={handleSubmit}>
+      <div className="grid grid-cols-2 gap-3 ">
         <Field>
           <FieldLabel htmlFor="point-latitude">Широта</FieldLabel>
           <Input
@@ -85,7 +85,7 @@ export function AddPointForm({
         </p>
       )}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full py-5" disabled={isSubmitting}>
         {isSubmitting ? "Отправка…" : "Отправить"}
       </Button>
     </form>

@@ -21,14 +21,19 @@ export const useAddPoint = () => {
   const { user } = useAuth();
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
+  const [isAuthPromptVisible, setIsAuthPromptVisible] = useState(false);
   const [values, setValues] = useState(initialValues);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddPoint = useCallback(() => {
     setError(null);
-    setIsVisible(true);
-  }, []);
+    if (user) {
+      setIsVisible(true);
+      return;
+    }
+    setIsAuthPromptVisible(true);
+  }, [user]);
 
   const handleChange = useCallback(
     (field: keyof AddPointFormValues, value: string) => {
@@ -103,6 +108,8 @@ export const useAddPoint = () => {
     handleClose,
     handleSubmit,
     isVisible,
+    isAuthPromptVisible,
+    setIsAuthPromptVisible,
     isSubmitting,
     error,
     values,

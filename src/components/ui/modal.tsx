@@ -34,12 +34,12 @@ export default function Modal({
       onClose={onClose}
       className="m-auto backdrop:bg-black/50 p-0 rounded-2xl shadow-xl w-[calc(100%-2rem)] max-w-md max-h-[90vh] bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 open:animate-in open:fade-in zoom-in-95 duration-200"
     >
-      <div className="flex flex-col max-h-[90vh] p-6">
+      <div className="flex flex-col max-h-[90vh] py-6">
         <div className="flex justify-between items-center mb-4 shrink-0">
-          <h2 className="text-xl font-semibold">{title}</h2>
+          <h2 className="text-xl font-semibold px-6">{title}</h2>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+            className="absolute right-[18] text-zinc-400 w-6 h-6 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
             ✕
           </button>
