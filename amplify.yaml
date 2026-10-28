@@ -1,0 +1,10 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - env | grep -e NEXT_PUBLIC_ >> .env.production
+        - npm run build
