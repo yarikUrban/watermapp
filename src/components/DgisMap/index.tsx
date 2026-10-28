@@ -55,6 +55,33 @@ export default function DgisMap({
     handleMapClickRef.current = handleMapClick;
   }, [handleMapClick]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    const container = containerRef.current;
+    if (!isMapReady || !map || !container) return;
+
+    let animationFrame = 0;
+    const resizeMap = () => {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(resizeMap);
+    resizeObserver.observe(container);
+    window.addEventListener("resize", resizeMap);
+    window.addEventListener("orientationchange", resizeMap);
+    resizeMap();
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", resizeMap);
+      window.removeEventListener("orientationchange", resizeMap);
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [isMapReady]);
+
   // 1. Инициализируем карту один раз.
   useEffect(() => {
     let cancelled = false;
