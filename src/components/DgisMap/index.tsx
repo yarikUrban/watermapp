@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { load } from "@2gis/mapgl";
 import type { MapPoint } from "@/entities/points";
 import { MapLoader } from "./MapLoader";
+import { useAddPointContext } from "@/features/addPoint/model/AddPointContext";
 
 type IProps = {
   points: MapPoint[];
@@ -31,17 +32,23 @@ export default function DgisMap({
   selectedPointId,
   handlePointPress,
 }: IProps) {
+  const { handleMapClick, isAddingPoint, values } = useAddPointContext();
   const containerRef = useRef<HTMLDivElement>(null);
+  const handleMapClickRef = useRef(handleMapClick);
 
   const mapRef = useRef<MapInstance | null>(null);
 
   const markersRef = useRef<Map<string, MarkerData>>(new Map());
+  const draftMarkerRef = useRef<MarkerInstance | null>(null);
 
   const previousSelectedIdRef = useRef<string | null>(null);
 
   const [mapgl, setMapgl] = useState<MapGLApi | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  useEffect(() => {
+    handleMapClickRef.current = handleMapClick;
+  }, [handleMapClick]);
 
   // 1. Инициализируем карту один раз.
   useEffect(() => {
@@ -64,6 +71,10 @@ export default function DgisMap({
           key: process.env.NEXT_PUBLIC_2GIS_MAPGL_KEY!,
         });
 
+        map.on("click", (event) => {
+          const [longitude, latitude] = event.lngLat;
+          handleMapClickRef.current(longitude, latitude);
+        });
         createdMap = map;
         mapRef.current = map;
 
@@ -84,6 +95,8 @@ export default function DgisMap({
       });
 
       markersRef.current.clear();
+      draftMarkerRef.current?.destroy();
+      draftMarkerRef.current = null;
       previousSelectedIdRef.current = null;
 
       createdMap?.destroy();
@@ -93,6 +106,35 @@ export default function DgisMap({
       }
     };
   }, []);
+
+  // Show the draft marker only while adding a point with valid coordinates.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!isMapReady || !map || !mapgl) return;
+
+    if (!isAddingPoint) {
+      draftMarkerRef.current?.hide();
+      return;
+    }
+
+    const latitude = Number(values.latitude);
+    const longitude = Number(values.longitude);
+    if (!values.latitude || !values.longitude || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      draftMarkerRef.current?.hide();
+      return;
+    }
+
+    if (!draftMarkerRef.current) {
+      draftMarkerRef.current = new mapgl.Marker(map, {
+        coordinates: [longitude, latitude],
+        icon: SELECTED_ICON,
+        size: SELECTED_SIZE,
+      });
+    } else {
+      draftMarkerRef.current.setCoordinates([longitude, latitude]);
+    }
+    draftMarkerRef.current.show();
+  }, [isAddingPoint, isMapReady, mapgl, values.latitude, values.longitude]);
 
   // 2. Создаём маркеры.
   // Этот эффект не зависит от selectedPointId.
@@ -127,7 +169,7 @@ export default function DgisMap({
     }
 
     map.on("styleload", () => {
-      console.log("STLELOAD" );
+      console.log("STLELOAD");
       setIsMapLoaded(true);
     });
     // Если список точек изменился, пересоздаём только

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useAddPoint } from "../model/hooks/useAddPoint";
+import { useAddPointContext } from "../model/AddPointContext";
+import { MapPin } from "lucide-react";
 
 function maskCoordinate(value: string) {
   const normalizedValue = value.replace(/,/g, ".");
@@ -44,6 +46,8 @@ export function AddPointForm({
   handleChange,
   handleSubmit,
 }: AddPointFormProps) {
+  const { isSelectingLocation, setIsSelectingLocation } = useAddPointContext();
+
   return (
     <form
       className="flex flex-col gap-3 px-4 sm:gap-4 sm:px-6"
@@ -111,6 +115,15 @@ export function AddPointForm({
           />
         </Field>
       </div>
+      <Button
+        type="button"
+        variant="outline"
+        className={`w-full ${isSelectingLocation ? "bg-surface-accent text-white" : ""}`}
+        onClick={() => setIsSelectingLocation(true)}
+      >
+        <MapPin aria-hidden="true" />
+        Указать на карте
+      </Button>
 
       <Field>
         <FieldLabel htmlFor="point-title">Название</FieldLabel>

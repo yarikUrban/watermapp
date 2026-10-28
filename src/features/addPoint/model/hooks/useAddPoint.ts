@@ -2,45 +2,38 @@ import { useAuth } from "@/providers/AuthProvider";
 import { createPoint } from "@/features/addPoint/api/createPoint";
 import { useCallback, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-
-export type AddPointFormValues = {
-  latitude: string;
-  longitude: string;
-  title: string;
-  description: string;
-};
-
-const initialValues: AddPointFormValues = {
-  latitude: "",
-  longitude: "",
-  title: "",
-  description: "",
-};
+import { useAddPointContext, type AddPointFormValues } from "../AddPointContext";
 
 export const useAddPoint = () => {
   const { user } = useAuth();
   const router = useRouter();
-  const [isVisible, setIsVisible] = useState(false);
+  const {
+    isAddingPoint,
+    setIsAddingPoint,
+    setIsSelectingLocation,
+    values,
+    setValues,
+  } = useAddPointContext();
   const [isAuthPromptVisible, setIsAuthPromptVisible] = useState(false);
-  const [values, setValues] = useState(initialValues);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddPoint = useCallback(() => {
     setError(null);
     if (user) {
-      setIsVisible(true);
+      setIsSelectingLocation(false);
+      setIsAddingPoint(true);
       return;
     }
     setIsAuthPromptVisible(true);
-  }, [user]);
+  }, [setIsAddingPoint, setIsSelectingLocation, user]);
 
   const handleChange = useCallback(
     (field: keyof AddPointFormValues, value: string) => {
       setValues((current) => ({ ...current, [field]: value }));
       setError(null);
     },
-    [],
+    [setValues],
   );
 
   const handleSubmit = useCallback(
@@ -89,25 +82,27 @@ export const useAddPoint = () => {
         return;
       }
 
-      setValues(initialValues);
-      setIsVisible(false);
+      setValues({ latitude: "", longitude: "", title: "", description: "" });
+      setIsSelectingLocation(false);
+      setIsAddingPoint(false);
       router.refresh();
     },
-    [isSubmitting, router, user, values],
+    [isSubmitting, router, setIsAddingPoint, setIsSelectingLocation, setValues, user, values],
   );
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return;
-    setIsVisible(false);
+    setIsSelectingLocation(false);
+    setIsAddingPoint(false);
     setError(null);
-  }, [isSubmitting]);
+  }, [isSubmitting, setIsAddingPoint, setIsSelectingLocation]);
 
   return {
     handleAddPoint,
     handleChange,
     handleClose,
     handleSubmit,
-    isVisible,
+    isVisible: isAddingPoint,
     isAuthPromptVisible,
     setIsAuthPromptVisible,
     isSubmitting,

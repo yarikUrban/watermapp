@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/lib/server";
-import type { AddPointFormValues } from "../model/hooks/useAddPoint";
+import type { AddPointFormValues } from "../model/AddPointContext";
 
 type CreatePointInput = {
   latitude: number;

@@ -11,6 +11,7 @@ import { AddPointForm } from "@/features/addPoint/ui/AddPointForm";
 import { LoginRequiredModal } from "@/features/addPoint/ui/LoginRequiredModal";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { useAddPointContext } from "@/features/addPoint/model/AddPointContext";
 
 type Props = {
   points: MapPoint[];
@@ -26,13 +27,22 @@ export default function MapOverlay({
   handleClearPoint,
 }: Props) {
   const isPointSelected = Boolean(currentPoint?.id);
+
   const {
-    handleAddPoint, handleChange, handleClose, handleSubmit,
-    isVisible: isAddingPoint, isAuthPromptVisible, setIsAuthPromptVisible,
-    isSubmitting, error, values,
+    handleAddPoint,
+    handleChange,
+    handleClose,
+    handleSubmit,
+    isVisible: isAddingPoint,
+    isAuthPromptVisible,
+    setIsAuthPromptVisible,
+    isSubmitting,
+    error,
+    values,
   } = useAddPoint();
+  const { isSelectingLocation } = useAddPointContext();
   const pointsCount = useMemo(() => points?.length ?? 0, [points]);
-  const isExpanded = isPointSelected || isAddingPoint;
+  const isExpanded = isPointSelected || (isAddingPoint && !isSelectingLocation);
 
   // One active view per section: point details, add form, or the points list.
   const sectionContent = isPointSelected ? (
@@ -71,7 +81,10 @@ export default function MapOverlay({
 
   return (
     <>
-      <LoginRequiredModal isOpen={isAuthPromptVisible} onClose={() => setIsAuthPromptVisible(false)} />
+      <LoginRequiredModal
+        isOpen={isAuthPromptVisible}
+        onClose={() => setIsAuthPromptVisible(false)}
+      />
       {!isAddingPoint && <MobileAddPointButton onAddPoint={handleAddPoint} />}
       <div className="hidden sm:flex absolute top-0 right-0 bottom-0 bg-white w-[360px] z-[100] flex-col border-l border-l-border-primary">
         {sectionContent}
