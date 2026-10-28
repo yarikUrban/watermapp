@@ -2,13 +2,27 @@
 
 import Link from "next/link";
 import { LogIn, LogOut } from "lucide-react";
-import { logOut } from "@/app/actions/auth";
+import { useState } from "react";
 import { Button, buttonVariants } from "../ui/button";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/app/lib/client";
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const { user, clearUser } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogOut = async () => {
+    setIsLoggingOut(true);
+    try {
+      const { error } = await createClient().auth.signOut();
+      if (!error) {
+        clearUser();
+      }
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-[200] border-b border-border/60 bg-background/75 backdrop-blur-md">
@@ -27,7 +41,8 @@ export default function Navbar() {
                 aria-label="Выйти"
                 title="Выйти"
                 className="size-9 rounded-full text-muted-foreground transition-colors duration-200 hover:bg-destructive/10 hover:text-destructive"
-                onClick={logOut}
+                onClick={handleLogOut}
+                disabled={isLoggingOut}
               >
                 <LogOut />
               </Button>

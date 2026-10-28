@@ -5,7 +5,6 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 import { AuthProvider } from "@/providers/AuthProvider";
-import { getUser } from "./actions/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,12 +27,11 @@ const inter = Inter({
   display: "swap",
 });
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const user = await getUser();
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body>
-        <AuthProvider key={user?.id ?? "anonymous"} initialUser={user}>
+        <AuthProvider initialUser={null}>
           <Navbar />
           {children}
         </AuthProvider>

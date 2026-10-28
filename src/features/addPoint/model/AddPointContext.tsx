@@ -12,6 +12,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
+import { AUTH_SIGNED_OUT_EVENT } from "@/providers/authEvents";
 
 export type AddPointFormValues = {
   latitude: string;
@@ -66,6 +67,24 @@ export function AddPointProvider({ children }: { children: ReactNode }) {
       );
     };
   }, []);
+
+  const clearDraftOnSignOut = useCallback(() => {
+    setIsAddingPoint(false);
+    setIsSelectingLocation(false);
+    setValues(initialValues);
+    imagesRef.current.forEach(({ previewUrl }) =>
+      URL.revokeObjectURL(previewUrl),
+    );
+    imagesRef.current = [];
+    setImages([]);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener(AUTH_SIGNED_OUT_EVENT, clearDraftOnSignOut);
+    return () => {
+      window.removeEventListener(AUTH_SIGNED_OUT_EVENT, clearDraftOnSignOut);
+    };
+  }, [clearDraftOnSignOut]);
 
   const handleMapClick = useCallback(
     (longitude: number, latitude: number) => {

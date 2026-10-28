@@ -11,10 +11,12 @@ import {
 
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/app/lib/client";
+import { AUTH_SIGNED_OUT_EVENT } from "./authEvents";
 
 
 type AuthContextValue = {
   user: User | null;
+  clearUser: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -27,6 +29,11 @@ export function AuthProvider({
   initialUser: User | null;
 }) {
   const [user, setUser] = useState<User | null>(initialUser);
+
+  const clearUser = () => {
+    setUser(null);
+    window.dispatchEvent(new Event(AUTH_SIGNED_OUT_EVENT));
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -41,7 +48,9 @@ export function AuthProvider({
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, clearUser }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
