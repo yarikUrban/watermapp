@@ -64,7 +64,7 @@ export async function signInGoogle(): Promise<AuthState> {
   const { error, data } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXTAUTH_URL}/login/callback`,
+      redirectTo: `https://main.d2dufkb73bator.amplifyapp.com/login/callback`,
     },
   });
   if (error) {
