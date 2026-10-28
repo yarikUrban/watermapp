@@ -13,7 +13,7 @@ export const PointDetail = ({ point, handleClear }: Props) => {
     <div className="h-full overflow-y-auto">
       <div className="border-b border-b-border-primary py-3 sm:py-6 px-3 sm:px-5 flex">
         <div className="flex flex-col w-full">
-          <h1 className="font-semibold text-lg sm:text-xl">{point?.title}</h1>
+          <h1 className="font-semibold text-lg sm:text-lg">{point?.title}</h1>
           <p className="text-gray-500 text-xs sm:text-sm">subtittle</p>
           <div className=" pt-2 sm:pt-4">
             <WaterStatusBadge status="normal" />

@@ -21,12 +21,12 @@ export function LoginRequiredModal({
           Чтобы добавить точку на карту, сначала войдите в аккаунт.
         </p>
         <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:justify-center">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button className="w-full sm:w-auto" type="button" variant="outline" onClick={onClose}>
             Назад
           </Button>
           <Link
             href="/login"
-            className={cn(buttonVariants(), "sm:min-w-32")}
+            className={cn(buttonVariants(), "w-full sm:w-auto sm:min-w-32")}
             onClick={onClose}
           >
             Войти

@@ -1,10 +1,8 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import DgisMap from "../DgisMap";
 import MapOverlay from "./MapOverlay";
 
-import { MapPoint } from "@/entities/points";
+import type { MapPoint } from "@/entities/points";
 import { useSelectPoint } from "@/features/selectPoint/model/useSelectPoint";
 import { MapWrapper } from "../DgisMap/MapWrapper";
 
@@ -13,13 +11,7 @@ export default function MapContainer({ points }: { points: MapPoint[] }) {
     useSelectPoint(points);
 
   return (
-    <div
-      style={{
-        borderRadius: "12px",
-        overflow: "hidden",
-      }}
-      className="h-screen"
-    >
+    <div className="relative h-dvh min-h-dvh w-full overflow-hidden sm:h-screen sm:min-h-0">
       <MapWrapper
         selectedPointId={String(currentPoint?.id) ?? null}
         points={points}

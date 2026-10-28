@@ -5,6 +5,33 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useAddPoint } from "../model/hooks/useAddPoint";
 
+function maskCoordinate(value: string) {
+  const normalizedValue = value.replace(/,/g, ".");
+  const isNegative = normalizedValue.trimStart().startsWith("-");
+  const separatorIndex = normalizedValue.indexOf(".");
+  const integerSource =
+    separatorIndex === -1
+      ? normalizedValue
+      : normalizedValue.slice(0, separatorIndex);
+  const integerDigits = integerSource.replace(/\D/g, "");
+  const hasSeparator =
+    (separatorIndex !== -1 && integerDigits.length > 0) ||
+    integerDigits.length > 2;
+  const integer = integerDigits.slice(0, 2);
+
+  if (!hasSeparator) {
+    return `${isNegative ? "-" : ""}${integer}`;
+  }
+
+  const fractionSource =
+    separatorIndex === -1
+      ? integerDigits.slice(2)
+      : normalizedValue.slice(separatorIndex + 1);
+  const fraction = fractionSource.replace(/\D/g, "").slice(0, 8);
+
+  return `${isNegative ? "-" : ""}${integer}.${fraction}`;
+}
+
 type AddPointFormProps = Pick<
   ReturnType<typeof useAddPoint>,
   "values" | "error" | "isSubmitting" | "handleChange" | "handleSubmit"
@@ -18,20 +45,38 @@ export function AddPointForm({
   handleSubmit,
 }: AddPointFormProps) {
   return (
-    <form className="flex flex-col gap-4 px-6" onSubmit={handleSubmit}>
-      <div className="grid grid-cols-2 gap-3 ">
+    <form
+      className="flex flex-col gap-3 px-4 sm:gap-4 sm:px-6"
+      onSubmit={handleSubmit}
+    >
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <Field>
           <FieldLabel htmlFor="point-latitude">Широта</FieldLabel>
           <Input
             id="point-latitude"
             name="latitude"
-            type="number"
-            step="any"
-            min="-90"
-            max="90"
+            type="text"
+            inputMode="decimal"
+            maxLength={12}
             placeholder="43.238"
             value={values.latitude}
-            onChange={(event) => handleChange("latitude", event.target.value)}
+            onChange={(event) => {
+              const input = event.currentTarget;
+              const rawValue = input.value;
+              const cursorPosition = input.selectionStart ?? rawValue.length;
+              const maskedValue = maskCoordinate(rawValue);
+              const maskedCursorPosition = maskCoordinate(
+                rawValue.slice(0, cursorPosition),
+              ).length;
+
+              handleChange("latitude", maskedValue);
+              requestAnimationFrame(() => {
+                input.setSelectionRange(
+                  maskedCursorPosition,
+                  maskedCursorPosition,
+                );
+              });
+            }}
             required
           />
         </Field>
@@ -40,13 +85,28 @@ export function AddPointForm({
           <Input
             id="point-longitude"
             name="longitude"
-            type="number"
-            step="any"
-            min="-180"
-            max="180"
+            type="text"
+            inputMode="decimal"
+            maxLength={12}
             placeholder="76.945"
             value={values.longitude}
-            onChange={(event) => handleChange("longitude", event.target.value)}
+            onChange={(event) => {
+              const input = event.currentTarget;
+              const rawValue = input.value;
+              const cursorPosition = input.selectionStart ?? rawValue.length;
+              const maskedValue = maskCoordinate(rawValue);
+              const maskedCursorPosition = maskCoordinate(
+                rawValue.slice(0, cursorPosition),
+              ).length;
+
+              handleChange("longitude", maskedValue);
+              requestAnimationFrame(() => {
+                input.setSelectionRange(
+                  maskedCursorPosition,
+                  maskedCursorPosition,
+                );
+              });
+            }}
             required
           />
         </Field>
@@ -74,7 +134,7 @@ export function AddPointForm({
           value={values.description}
           onChange={(event) => handleChange("description", event.target.value)}
           maxLength={1000}
-          rows={4}
+          rows={3}
           className="w-full resize-y rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </Field>
