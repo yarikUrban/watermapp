@@ -1,11 +1,17 @@
 import { useAuth } from "@/providers/AuthProvider";
-import { createPoint } from "@/features/addPoint/api/createPoint";
+import {
+  createPoint,
+  savePointRequestImages,
+  uploadImage,
+} from "@/features/addPoint/api/createPoint";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   useAddPointContext,
   type AddPointFormValues,
 } from "../AddPointContext";
+import { SUPPORTED_IMAGE_TYPES } from "../imageTypes";
+import { compressImage } from "../compressImage";
 
 export type AddPointNotification = {
   type: "success" | "error";
@@ -20,7 +26,9 @@ export const useAddPoint = () => {
     setIsAddingPoint,
     setIsSelectingLocation,
     values,
+    images,
     setValues,
+    setImages,
   } = useAddPointContext();
   const [isAuthPromptVisible, setIsAuthPromptVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +36,6 @@ export const useAddPoint = () => {
   const [notification, setNotification] = useState<AddPointNotification | null>(
     null,
   );
-
   useEffect(() => {
     if (!notification) return;
     const timeout = window.setTimeout(() => setNotification(null), 4500);
@@ -83,6 +90,10 @@ export const useAddPoint = () => {
         setError("Введите название точки.");
         return;
       }
+      if (images.some(({ file }) => !SUPPORTED_IMAGE_TYPES.has(file.type))) {
+        setError("Поддерживаются изображения PNG, JPG, JPEG, WEBP и SVG.");
+        return;
+      }
 
       setIsSubmitting(true);
       setError(null);
@@ -94,7 +105,6 @@ export const useAddPoint = () => {
           description: values.description.trim(),
           hydrolyzable: values.hydrolyzable,
         });
-
         if (!result.success) {
           setError(result.error);
           setNotification({
@@ -102,6 +112,26 @@ export const useAddPoint = () => {
             message: "При добавлении точки произошла ошибка",
           });
           return;
+        }
+
+        const uploadResults = await Promise.allSettled(
+          images.map(async ({ file }) => {
+            const compressedFile = await compressImage(file);
+            const formData = new FormData();
+            formData.set("file", compressedFile);
+            return uploadImage(formData, result.pointRequestId);
+          }),
+        );
+        const uploadedImages = uploadResults.flatMap((upload, sortOrder) =>
+          upload.status === "fulfilled"
+            ? [{ storagePath: upload.value, sortOrder }]
+            : [],
+        );
+
+        try {
+          await savePointRequestImages(result.pointRequestId, uploadedImages);
+        } catch {
+          // The point request is already created; image failures do not change its success.
         }
 
         setNotification({
@@ -115,6 +145,8 @@ export const useAddPoint = () => {
           description: "",
           hydrolyzable: false,
         });
+        images.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
+        setImages([]);
         setIsSelectingLocation(false);
         setIsAddingPoint(false);
         router.refresh();
@@ -134,6 +166,8 @@ export const useAddPoint = () => {
       setIsAddingPoint,
       setIsSelectingLocation,
       setValues,
+      images,
+      setImages,
       user,
       values,
     ],

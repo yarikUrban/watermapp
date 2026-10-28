@@ -4,7 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type ReactNode,
@@ -17,6 +19,11 @@ export type AddPointFormValues = {
   title: string;
   description: string;
   hydrolyzable: boolean;
+};
+
+export type AddPointImage = {
+  file: File;
+  previewUrl: string;
 };
 
 const initialValues: AddPointFormValues = {
@@ -34,6 +41,8 @@ type AddPointContextValue = {
   setIsSelectingLocation: Dispatch<SetStateAction<boolean>>;
   values: AddPointFormValues;
   setValues: Dispatch<SetStateAction<AddPointFormValues>>;
+  images: AddPointImage[];
+  setImages: Dispatch<SetStateAction<AddPointImage[]>>;
   handleMapClick: (longitude: number, latitude: number) => void;
 };
 
@@ -43,6 +52,20 @@ export function AddPointProvider({ children }: { children: ReactNode }) {
   const [isAddingPoint, setIsAddingPoint] = useState(false);
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
   const [values, setValues] = useState(initialValues);
+  const [images, setImages] = useState<AddPointImage[]>([]);
+  const imagesRef = useRef(images);
+
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach(({ previewUrl }) =>
+        URL.revokeObjectURL(previewUrl),
+      );
+    };
+  }, []);
 
   const handleMapClick = useCallback(
     (longitude: number, latitude: number) => {
@@ -67,9 +90,11 @@ export function AddPointProvider({ children }: { children: ReactNode }) {
       setIsSelectingLocation,
       values,
       setValues,
+      images,
+      setImages,
       handleMapClick,
     }),
-    [isAddingPoint, isSelectingLocation, values, handleMapClick],
+    [isAddingPoint, isSelectingLocation, values, images, handleMapClick],
   );
 
   return (

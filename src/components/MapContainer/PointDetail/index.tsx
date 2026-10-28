@@ -1,3 +1,11 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import {
+  getPointImages,
+  type PointImage,
+} from "@/entities/points/api/getPointImages";
 import { WaterStatusBadge } from "@/components/ui/WaterStatusBadge";
 import { MapPoint } from "@/entities/points";
 import { X } from "lucide-react";
@@ -9,6 +17,48 @@ type Props = {
 };
 
 export const PointDetail = ({ point, handleClear }: Props) => {
+  const [imageResult, setImageResult] = useState<{
+    pointId: number;
+    images: PointImage[];
+  } | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<PointImage | null>(null);
+  const areImagesLoading = imageResult?.pointId !== point.id;
+  const images = imageResult?.pointId === point.id ? imageResult.images : [];
+
+  useEffect(() => {
+    let isCurrentPoint = true;
+
+    getPointImages(point.id)
+      .then((pointImages) => {
+        if (isCurrentPoint) {
+          setImageResult({ pointId: point.id, images: pointImages });
+        }
+      })
+      .catch(() => {
+        if (isCurrentPoint) setImageResult({ pointId: point.id, images: [] });
+      });
+
+    return () => {
+      isCurrentPoint = false;
+    };
+  }, [point.id]);
+
+  useEffect(() => {
+    if (!fullscreenImage) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFullscreenImage(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [fullscreenImage]);
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="border-b border-b-border-primary py-3 sm:py-6 px-3 sm:px-5 flex">
@@ -25,6 +75,70 @@ export const PointDetail = ({ point, handleClear }: Props) => {
           <X className="text-icon-primary" />
         </Button>
       </div>
+
+      {(areImagesLoading || images.length > 0) && (
+        <ul className="flex w-full gap-2 overflow-x-auto px-5 py-4 scrollbar-hide">
+          {areImagesLoading
+            ? Array.from({ length: 3 }, (_, index) => (
+                <li
+                  key={`image-placeholder-${index}`}
+                  aria-hidden="true"
+                  className="size-[120px] shrink-0 animate-pulse rounded-lg bg-gray-200"
+                />
+              ))
+            : images.map((image, index) => (
+            <li key={image.id} className="shrink-0">
+              <button
+                type="button"
+                aria-label={`Показать изображение ${index + 1} на весь экран`}
+                className="block h-[100px] max-w-none overflow-hidden rounded-lg border border-border-primary sm:h-[120px]"
+                onClick={() => setFullscreenImage(image)}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={image.url}
+                  alt={`${point.title}, изображение ${index + 1}`}
+                  loading="lazy"
+                  className="block h-full w-auto max-w-none object-contain"
+                />
+              </button>
+            </li>
+              ))}
+        </ul>
+      )}
+
+      {fullscreenImage &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Просмотр изображения"
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-3 sm:p-6"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <button
+              type="button"
+              aria-label="Закрыть изображение"
+              className="absolute right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+              onClick={() => setFullscreenImage(null)}
+            >
+              <X aria-hidden="true" />
+            </button>
+            <div
+              className="flex h-full w-full items-center justify-center"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={fullscreenImage.url}
+                alt={`${point.title}, полноразмерное изображение`}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {point?.hydrolyzed && (
         <div className="p-5">
