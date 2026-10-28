@@ -50,9 +50,12 @@ export function AddPointForm({
 
   return (
     <form
-      className="flex flex-col gap-3 px-4 sm:gap-4 sm:px-6 scrollbar-hide"
+      className="flex flex-col gap-3 px-4 sm:gap-4 sm:px-5 scrollbar-hide"
       onSubmit={handleSubmit}
     >
+      <div className="text-sm text-gray-500">
+        Точка появится на карте после проверки администрации
+      </div>
       <div className="grid grid-cols-2 gap-2 sm:gap-3 scrollbar-hide">
         <Field>
           <FieldLabel htmlFor="point-latitude">Широта</FieldLabel>

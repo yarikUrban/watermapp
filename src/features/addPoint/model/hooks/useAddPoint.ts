@@ -1,11 +1,16 @@
 import { useAuth } from "@/providers/AuthProvider";
 import { createPoint } from "@/features/addPoint/api/createPoint";
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   useAddPointContext,
   type AddPointFormValues,
 } from "../AddPointContext";
+
+export type AddPointNotification = {
+  type: "success" | "error";
+  message: string;
+};
 
 export const useAddPoint = () => {
   const { user } = useAuth();
@@ -20,6 +25,15 @@ export const useAddPoint = () => {
   const [isAuthPromptVisible, setIsAuthPromptVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState<AddPointNotification | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!notification) return;
+    const timeout = window.setTimeout(() => setNotification(null), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [notification]);
 
   const handleAddPoint = useCallback(() => {
     setError(null);
@@ -72,30 +86,47 @@ export const useAddPoint = () => {
 
       setIsSubmitting(true);
       setError(null);
-      const result = await createPoint({
-        latitude,
-        longitude,
-        title: values.title.trim(),
-        description: values.description.trim(),
-        hydrolyzable: values.hydrolyzable,
-      });
-      setIsSubmitting(false);
+      try {
+        const result = await createPoint({
+          latitude,
+          longitude,
+          title: values.title.trim(),
+          description: values.description.trim(),
+          hydrolyzable: values.hydrolyzable,
+        });
 
-      if (!result.success) {
-        setError(result.error);
-        return;
+        if (!result.success) {
+          setError(result.error);
+          setNotification({
+            type: "error",
+            message: "При добавлении точки произошла ошибка",
+          });
+          return;
+        }
+
+        setNotification({
+          type: "success",
+          message: "Точка добавилась успешно",
+        });
+        setValues({
+          latitude: "",
+          longitude: "",
+          title: "",
+          description: "",
+          hydrolyzable: false,
+        });
+        setIsSelectingLocation(false);
+        setIsAddingPoint(false);
+        router.refresh();
+      } catch {
+        setError("Не удалось добавить точку. Попробуйте ещё раз.");
+        setNotification({
+          type: "error",
+          message: "При добавлении точки произошла ошибка",
+        });
+      } finally {
+        setIsSubmitting(false);
       }
-
-      setValues({
-        latitude: "",
-        longitude: "",
-        title: "",
-        description: "",
-        hydrolyzable: false,
-      });
-      setIsSelectingLocation(false);
-      setIsAddingPoint(false);
-      router.refresh();
     },
     [
       isSubmitting,
@@ -126,5 +157,6 @@ export const useAddPoint = () => {
     isSubmitting,
     error,
     values,
+    notification,
   };
 };

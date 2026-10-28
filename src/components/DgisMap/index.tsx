@@ -23,9 +23,11 @@ type MarkerData = {
 
 const HYDROLYZED_ICON = "/icons/mapMarker.svg";
 const NOT_HYDROLYZED_ICON = "/icons/mapMarkerPoison.svg";
+const ADDING_ICON = "/icons/addingMarker.svg";
 
 const DEFAULT_SIZE: [number, number] = [18, 18];
 const SELECTED_SIZE: [number, number] = [24, 24];
+const ADDING_SIZE: [number, number] = [14, 14];
 
 const getPointIcon = (point: MapPoint) =>
   point.hydrolyzed ? HYDROLYZED_ICON : NOT_HYDROLYZED_ICON;
@@ -122,7 +124,12 @@ export default function DgisMap({
 
     const latitude = Number(values.latitude);
     const longitude = Number(values.longitude);
-    if (!values.latitude || !values.longitude || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    if (
+      !values.latitude ||
+      !values.longitude ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
+    ) {
       draftMarkerRef.current?.hide();
       return;
     }
@@ -130,8 +137,8 @@ export default function DgisMap({
     if (!draftMarkerRef.current) {
       draftMarkerRef.current = new mapgl.Marker(map, {
         coordinates: [longitude, latitude],
-        icon: values.hydrolyzable ? HYDROLYZED_ICON : NOT_HYDROLYZED_ICON,
-        size: SELECTED_SIZE,
+        icon: ADDING_ICON,
+        size: ADDING_SIZE,
       });
     } else {
       draftMarkerRef.current.setCoordinates([longitude, latitude]);

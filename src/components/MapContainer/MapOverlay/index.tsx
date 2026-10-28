@@ -12,6 +12,7 @@ import { LoginRequiredModal } from "@/features/addPoint/ui/LoginRequiredModal";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useAddPointContext } from "@/features/addPoint/model/AddPointContext";
+import { AddPointNotification } from "@/features/addPoint/ui/AddPointNotification";
 
 type Props = {
   points: MapPoint[];
@@ -39,6 +40,7 @@ export default function MapOverlay({
     isSubmitting,
     error,
     values,
+    notification,
   } = useAddPoint();
   const { isSelectingLocation } = useAddPointContext();
   const pointsCount = useMemo(() => points?.length ?? 0, [points]);
@@ -85,6 +87,7 @@ export default function MapOverlay({
         isOpen={isAuthPromptVisible}
         onClose={() => setIsAuthPromptVisible(false)}
       />
+      <AddPointNotification notification={notification} />
       {!isAddingPoint && <MobileAddPointButton onAddPoint={handleAddPoint} />}
       <div className="hidden sm:flex absolute top-0 right-0 bottom-0 bg-white w-[360px] z-[100] flex-col border-l border-l-border-primary">
         {sectionContent}
