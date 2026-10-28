@@ -51,6 +51,7 @@ export default function DgisMap({
   const [mapgl, setMapgl] = useState<MapGLApi | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [styleRevision, setStyleRevision] = useState(0);
   useEffect(() => {
     handleMapClickRef.current = handleMapClick;
   }, [handleMapClick]);
@@ -96,11 +97,21 @@ export default function DgisMap({
         const map = new api.Map(containerRef.current, {
           center: [76.922349, 43.244024],
           zoom: 13,
+          zoomControl: false,
           rotation: 0,
           pitch: 0,
           disablePitchByUserInteraction: true,
           disableRotationByUserInteraction: true,
           key: process.env.NEXT_PUBLIC_2GIS_MAPGL_KEY!,
+        });
+
+        // Listen as soon as the map exists. Waiting for the markers effect can
+        // miss styleload when the map initializes quickly (for example on return navigation).
+        map.on("styleload", () => {
+          setIsMapLoaded(true);
+          draftMarkerRef.current?.destroy();
+          draftMarkerRef.current = null;
+          setStyleRevision((revision) => revision + 1);
         });
 
         map.on("click", (event) => {
@@ -142,7 +153,7 @@ export default function DgisMap({
   // Show the draft marker only while adding a point with valid coordinates.
   useEffect(() => {
     const map = mapRef.current;
-    if (!isMapReady || !map || !mapgl) return;
+    if (!isMapReady || styleRevision === 0 || !map || !mapgl) return;
 
     if (!isAddingPoint) {
       draftMarkerRef.current?.hide();
@@ -179,6 +190,7 @@ export default function DgisMap({
     isAddingPoint,
     isMapReady,
     mapgl,
+    styleRevision,
     values.hydrolyzable,
     values.latitude,
     values.longitude,
@@ -189,7 +201,9 @@ export default function DgisMap({
   useEffect(() => {
     const map = mapRef.current;
 
-    if (!isMapReady || !map || !mapgl) return;
+    // MapGL emits styleload again whenever the style is replaced. Wait for
+    // that event and rebuild overlays because the style reload can clear them.
+    if (!isMapReady || styleRevision === 0 || !map || !mapgl) return;
 
     markersRef.current.forEach(({ marker }) => {
       marker.destroy();
@@ -216,10 +230,6 @@ export default function DgisMap({
       });
     }
 
-    map.on("styleload", () => {
-      console.log("STLELOAD");
-      setIsMapLoaded(true);
-    });
     // Если список точек изменился, пересоздаём только
     // маркеры этого списка при следующем запуске эффекта.
     return () => {
@@ -230,11 +240,11 @@ export default function DgisMap({
       markersRef.current.clear();
       previousSelectedIdRef.current = null;
     };
-  }, [points, handlePointPress, isMapReady, mapgl]);
+  }, [points, handlePointPress, isMapReady, mapgl, styleRevision]);
 
   // 3. Меняем только предыдущий и новый выбранный маркеры.
   useEffect(() => {
-    if (!isMapReady) return;
+    if (!isMapReady || styleRevision === 0) return;
 
     const previousId = previousSelectedIdRef.current;
 
@@ -263,12 +273,16 @@ export default function DgisMap({
     }
 
     previousSelectedIdRef.current = selectedPointId;
-  }, [selectedPointId, isMapReady, points]);
+  }, [selectedPointId, isMapReady, points, styleRevision]);
 
   return (
-    <>
-      {!isMapLoaded && <MapLoader />}
-      <div ref={containerRef} className="h-full w-full overflow-hidden" />
-    </>
+    <div className="relative h-full w-full overflow-hidden">
+      <div ref={containerRef} className="absolute inset-0 overflow-hidden" />
+      {!isMapLoaded && (
+        <div className="absolute inset-0 z-10">
+          <MapLoader />
+        </div>
+      )}
+    </div>
   );
 }

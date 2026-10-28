@@ -16,12 +16,52 @@ type Props = {
   handleClear: () => void;
 };
 
+type PointImageThumbnailProps = {
+  image: PointImage;
+  alt: string;
+  onClick: () => void;
+};
+
+const PointImageThumbnail = ({
+  image,
+  alt,
+  onClick,
+}: PointImageThumbnailProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  return (
+    <button
+      type="button"
+      aria-label="Показать изображение на весь экран"
+      className={`relative block h-[100px] shrink-0 overflow-hidden rounded-lg border border-border-primary bg-gray-100 sm:h-[120px] ${isLoaded ? "w-auto" : "w-[100px] sm:w-[120px]"}`}
+      onClick={onClick}
+    >
+      {!isLoaded && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 animate-pulse bg-gray-200"
+        />
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={image.url}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setIsLoaded(true)}
+        className={`relative block h-full w-auto max-w-none object-contain transition-opacity duration-200 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+      />
+    </button>
+  );
+};
+
 export const PointDetail = ({ point, handleClear }: Props) => {
   const [imageResult, setImageResult] = useState<{
     pointId: number;
     images: PointImage[];
   } | null>(null);
-  const [fullscreenImage, setFullscreenImage] = useState<PointImage | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<PointImage | null>(
+    null,
+  );
   const areImagesLoading = imageResult?.pointId !== point.id;
   const images = imageResult?.pointId === point.id ? imageResult.images : [];
 
@@ -83,28 +123,27 @@ export const PointDetail = ({ point, handleClear }: Props) => {
                 <li
                   key={`image-placeholder-${index}`}
                   aria-hidden="true"
-                  className="size-[120px] shrink-0 animate-pulse rounded-lg bg-gray-200"
+                  className="size-[100px] shrink-0 animate-pulse rounded-lg bg-gray-200 sm:size-[120px]"
                 />
               ))
             : images.map((image, index) => (
-            <li key={image.id} className="shrink-0">
-              <button
-                type="button"
-                aria-label={`Показать изображение ${index + 1} на весь экран`}
-                className="block h-[100px] max-w-none overflow-hidden rounded-lg border border-border-primary sm:h-[120px]"
-                onClick={() => setFullscreenImage(image)}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={image.url}
-                  alt={`${point.title}, изображение ${index + 1}`}
-                  loading="lazy"
-                  className="block h-full w-auto max-w-none object-contain"
-                />
-              </button>
-            </li>
+                <li key={image.id} className="shrink-0">
+                  <PointImageThumbnail
+                    image={image}
+                    alt={`${point.title}, изображение ${index + 1}`}
+                    onClick={() => setFullscreenImage(image)}
+                  />
+                </li>
               ))}
         </ul>
+      )}
+
+      {point.description && (
+        <div className="px-5 pb-5">
+          <p className="whitespace-pre-wrap text-sm text-gray-600">
+            {point.description}
+          </p>
+        </div>
       )}
 
       {fullscreenImage &&
@@ -140,11 +179,6 @@ export const PointDetail = ({ point, handleClear }: Props) => {
           document.body,
         )}
 
-      {point?.hydrolyzed && (
-        <div className="p-5">
-          <p className="text-sm text-gray-600">{point?.hydrolyzed}</p>
-        </div>
-      )}
     </div>
   );
 };

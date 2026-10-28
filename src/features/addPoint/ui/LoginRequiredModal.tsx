@@ -16,12 +16,17 @@ export function LoginRequiredModal({
 }: LoginRequiredModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Войдите, чтобы продолжить">
-      <div className="flex flex-col items-center gap-5 py-2 text-center">
+      <div className="flex flex-col items-center gap-5 px-4 sm:px-6 py-2 text-center">
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">
           Чтобы добавить точку на карту, сначала войдите в аккаунт.
         </p>
         <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:justify-center">
-          <Button className="w-full sm:w-auto" type="button" variant="outline" onClick={onClose}>
+          <Button
+            className="w-full sm:w-auto"
+            type="button"
+            variant="outline"
+            onClick={onClose}
+          >
             Назад
           </Button>
           <Link
