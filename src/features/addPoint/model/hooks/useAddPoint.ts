@@ -2,7 +2,10 @@ import { useAuth } from "@/providers/AuthProvider";
 import { createPoint } from "@/features/addPoint/api/createPoint";
 import { useCallback, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useAddPointContext, type AddPointFormValues } from "../AddPointContext";
+import {
+  useAddPointContext,
+  type AddPointFormValues,
+} from "../AddPointContext";
 
 export const useAddPoint = () => {
   const { user } = useAuth();
@@ -29,7 +32,7 @@ export const useAddPoint = () => {
   }, [setIsAddingPoint, setIsSelectingLocation, user]);
 
   const handleChange = useCallback(
-    (field: keyof AddPointFormValues, value: string) => {
+    (field: keyof AddPointFormValues, value: string | boolean) => {
       setValues((current) => ({ ...current, [field]: value }));
       setError(null);
     },
@@ -74,6 +77,7 @@ export const useAddPoint = () => {
         longitude,
         title: values.title.trim(),
         description: values.description.trim(),
+        hydrolyzable: values.hydrolyzable,
       });
       setIsSubmitting(false);
 
@@ -82,12 +86,26 @@ export const useAddPoint = () => {
         return;
       }
 
-      setValues({ latitude: "", longitude: "", title: "", description: "" });
+      setValues({
+        latitude: "",
+        longitude: "",
+        title: "",
+        description: "",
+        hydrolyzable: false,
+      });
       setIsSelectingLocation(false);
       setIsAddingPoint(false);
       router.refresh();
     },
-    [isSubmitting, router, setIsAddingPoint, setIsSelectingLocation, setValues, user, values],
+    [
+      isSubmitting,
+      router,
+      setIsAddingPoint,
+      setIsSelectingLocation,
+      setValues,
+      user,
+      values,
+    ],
   );
 
   const handleClose = useCallback(() => {

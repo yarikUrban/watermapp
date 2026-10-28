@@ -16,6 +16,7 @@ export type AddPointFormValues = {
   longitude: string;
   title: string;
   description: string;
+  hydrolyzable: boolean;
 };
 
 const initialValues: AddPointFormValues = {
@@ -23,6 +24,7 @@ const initialValues: AddPointFormValues = {
   longitude: "",
   title: "",
   description: "",
+  hydrolyzable: false,
 };
 
 type AddPointContextValue = {

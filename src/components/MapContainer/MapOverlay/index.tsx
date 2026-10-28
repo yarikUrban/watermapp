@@ -50,7 +50,7 @@ export default function MapOverlay({
       <PointDetail handleClear={handleClearPoint} point={currentPoint} />
     </div>
   ) : isAddingPoint ? (
-    <section className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+    <section className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-none">
       <div className="flex items-center justify-between border-b border-border-primary px-5 pt-4 sm:pt-[68] pb-3">
         <h2 className="text-lg font-semibold">Добавить точку</h2>
         <Button
@@ -62,7 +62,7 @@ export default function MapOverlay({
           <X className="text-icon-primary" />
         </Button>
       </div>
-      <div className="py-5">
+      <div className="py-5 pb-28 sm:pb-5">
         <AddPointForm
           values={values}
           error={error}

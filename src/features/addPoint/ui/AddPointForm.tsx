@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useAddPoint } from "../model/hooks/useAddPoint";
 import { useAddPointContext } from "../model/AddPointContext";
 import { MapPin } from "lucide-react";
-
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 function maskCoordinate(value: string) {
   const normalizedValue = value.replace(/,/g, ".");
   const isNegative = normalizedValue.trimStart().startsWith("-");
@@ -50,10 +50,10 @@ export function AddPointForm({
 
   return (
     <form
-      className="flex flex-col gap-3 px-4 sm:gap-4 sm:px-6"
+      className="flex flex-col gap-3 px-4 sm:gap-4 sm:px-6 scrollbar-hide"
       onSubmit={handleSubmit}
     >
-      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 scrollbar-hide">
         <Field>
           <FieldLabel htmlFor="point-latitude">Широта</FieldLabel>
           <Input
@@ -126,6 +126,26 @@ export function AddPointForm({
       </Button>
 
       <Field>
+        <FieldLabel>Подлежит гидролизу</FieldLabel>
+        <RadioGroup
+          aria-label="Подлежит гидролизу"
+          className="flex gap-5"
+          value={values.hydrolyzable ? "true" : "false"}
+          onValueChange={(value) =>
+            handleChange("hydrolyzable", value === "true")
+          }
+        >
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <RadioGroupItem value="true" />
+            Да
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <RadioGroupItem value="false" />
+            Нет
+          </label>
+        </RadioGroup>
+      </Field>
+      <Field>
         <FieldLabel htmlFor="point-title">Название</FieldLabel>
         <Input
           id="point-title"
@@ -148,7 +168,7 @@ export function AddPointForm({
           onChange={(event) => handleChange("description", event.target.value)}
           maxLength={1000}
           rows={3}
-          className="w-full resize-y rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </Field>
 
@@ -157,8 +177,16 @@ export function AddPointForm({
           {error}
         </p>
       )}
-
-      <Button type="submit" className="w-full py-5" disabled={isSubmitting}>
+      <div className="absolute bottom-0 pb-6 px-4 left-0 w-full sm:hidden">
+        <Button type="submit" className="w-full py-6" disabled={isSubmitting}>
+          {isSubmitting ? "Отправка…" : "Отправить"}
+        </Button>
+      </div>
+      <Button
+        type="submit"
+        className="w-full py-5 hidden sm:flex"
+        disabled={isSubmitting}
+      >
         {isSubmitting ? "Отправка…" : "Отправить"}
       </Button>
     </form>
