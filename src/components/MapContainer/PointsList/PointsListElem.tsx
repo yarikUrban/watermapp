@@ -1,4 +1,4 @@
-import { MapPoint, MapPointTypes } from "@/entities/points";
+import { MapPoint } from "@/entities/points";
 import React from "react";
 import { ChevronRight } from "lucide-react";
 import { WaterStatusBadge } from "@/components/ui/WaterStatusBadge";
@@ -8,6 +8,7 @@ type Props = {
 };
 
 const PointsListElem = ({ item, onPress }: Props) => {
+  console.log(item);
   return (
     <div
       onClick={() => {
@@ -22,10 +23,8 @@ const PointsListElem = ({ item, onPress }: Props) => {
         </div>
       </div>
 
-      <div>
-        <WaterStatusBadge
-          status={item.type === "poison" ? "warning" : "normal"}
-        />
+      <div className="pt-1 sm:pt-2">
+        <WaterStatusBadge hydrolyzed={item.hydrolyzed} />
       </div>
     </div>
   );

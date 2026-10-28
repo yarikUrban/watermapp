@@ -21,11 +21,14 @@ type MarkerData = {
   point: MapPoint;
 };
 
-const NORMAL_ICON = "/icons/mapMarker.svg";
-const SELECTED_ICON = "/icons/mapMarkerPoison.svg";
+const HYDROLYZED_ICON = "/icons/mapMarker.svg";
+const NOT_HYDROLYZED_ICON = "/icons/mapMarkerPoison.svg";
 
-const NORMAL_SIZE: [number, number] = [18, 18];
+const DEFAULT_SIZE: [number, number] = [18, 18];
 const SELECTED_SIZE: [number, number] = [24, 24];
+
+const getPointIcon = (point: MapPoint) =>
+  point.hydrolyzed ? HYDROLYZED_ICON : NOT_HYDROLYZED_ICON;
 
 export default function DgisMap({
   points,
@@ -127,14 +130,25 @@ export default function DgisMap({
     if (!draftMarkerRef.current) {
       draftMarkerRef.current = new mapgl.Marker(map, {
         coordinates: [longitude, latitude],
-        icon: SELECTED_ICON,
+        icon: values.hydrolyzable ? HYDROLYZED_ICON : NOT_HYDROLYZED_ICON,
         size: SELECTED_SIZE,
       });
     } else {
       draftMarkerRef.current.setCoordinates([longitude, latitude]);
+      draftMarkerRef.current.setIcon({
+        icon: values.hydrolyzable ? HYDROLYZED_ICON : NOT_HYDROLYZED_ICON,
+        size: SELECTED_SIZE,
+      });
     }
     draftMarkerRef.current.show();
-  }, [isAddingPoint, isMapReady, mapgl, values.latitude, values.longitude]);
+  }, [
+    isAddingPoint,
+    isMapReady,
+    mapgl,
+    values.hydrolyzable,
+    values.latitude,
+    values.longitude,
+  ]);
 
   // 2. Создаём маркеры.
   // Этот эффект не зависит от selectedPointId.
@@ -154,8 +168,8 @@ export default function DgisMap({
 
       const marker = new mapgl.Marker(map, {
         coordinates: [point.longitude, point.latitude],
-        icon: NORMAL_ICON,
-        size: NORMAL_SIZE,
+        icon: getPointIcon(point),
+        size: DEFAULT_SIZE,
       });
 
       marker.on("click", () => {
@@ -194,20 +208,24 @@ export default function DgisMap({
     if (previousId !== null) {
       const previousMarker = markersRef.current.get(previousId);
 
-      previousMarker?.marker.setIcon({
-        icon: NORMAL_ICON,
-        size: NORMAL_SIZE,
-      });
+      if (previousMarker) {
+        previousMarker.marker.setIcon({
+          icon: getPointIcon(previousMarker.point),
+          size: DEFAULT_SIZE,
+        });
+      }
     }
 
     // Выделяем новый маркер.
     if (selectedPointId !== null) {
       const selectedMarker = markersRef.current.get(selectedPointId);
 
-      selectedMarker?.marker.setIcon({
-        icon: SELECTED_ICON,
-        size: SELECTED_SIZE,
-      });
+      if (selectedMarker) {
+        selectedMarker.marker.setIcon({
+          icon: getPointIcon(selectedMarker.point),
+          size: SELECTED_SIZE,
+        });
+      }
     }
 
     previousSelectedIdRef.current = selectedPointId;

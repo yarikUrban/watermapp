@@ -14,9 +14,8 @@ export const PointDetail = ({ point, handleClear }: Props) => {
       <div className="border-b border-b-border-primary py-3 sm:py-6 px-3 sm:px-5 flex">
         <div className="flex flex-col w-full">
           <h1 className="font-semibold text-lg sm:text-lg">{point?.title}</h1>
-          <p className="text-gray-500 text-xs sm:text-sm">subtittle</p>
-          <div className=" pt-2 sm:pt-4">
-            <WaterStatusBadge status="normal" />
+          <div className="pt-1 sm:pt-2">
+            <WaterStatusBadge hydrolyzed={point.hydrolyzed} />
           </div>
         </div>
         <Button
@@ -27,12 +26,11 @@ export const PointDetail = ({ point, handleClear }: Props) => {
         </Button>
       </div>
 
-      <div className="p-5">
-        <p className="text-sm text-gray-600">
-          Здесь может быть длинное описание точки, история, фото, отзывы и т.д.
-          Всё это будет прокручиваться вместе с шапкой.
-        </p>
-      </div>
+      {point?.hydrolyzed && (
+        <div className="p-5">
+          <p className="text-sm text-gray-600">{point?.hydrolyzed}</p>
+        </div>
+      )}
     </div>
   );
 };
