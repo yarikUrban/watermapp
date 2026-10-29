@@ -100,24 +100,24 @@ export const PointDetail = ({ point, handleClear }: Props) => {
   }, [fullscreenImage]);
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="border-b border-b-border-primary py-3 sm:py-6 px-3 sm:px-5 flex">
+    <div className="h-full overflow-y-auto bg-white">
+      <div className="flex border-b border-[#edf1ed] bg-gradient-to-br from-[#f6faf6] via-white to-[#edf5ef] px-5 pb-5 pt-6 sm:px-6 sm:pb-6 sm:pt-8">
         <div className="flex flex-col w-full">
-          <h1 className="font-semibold text-lg sm:text-lg">{point?.title}</h1>
+          <h1 className="text-xl font-semibold leading-snug tracking-[-.035em] text-[#1c3026] sm:text-2xl">{point?.title}</h1>
           <div className="pt-1 sm:pt-2">
             <WaterStatusBadge hydrolyzed={point.hydrolyzed} />
           </div>
         </div>
         <Button
           onClick={handleClear}
-          className="bg-gray-100 w-8 h-8 rounded-sm hover:bg-gray-200 cursor-pointer active:bg-gray-300"
+          type="button" aria-label="Закрыть карточку источника" className="ml-3 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#e7eee8] bg-white/80 text-[#687970] shadow-sm hover:bg-white hover:text-[#243b2e]"
         >
           <X className="text-icon-primary" />
         </Button>
       </div>
 
       {(areImagesLoading || images.length > 0) && (
-        <ul className="flex w-full gap-2 overflow-x-auto px-5 py-4 scrollbar-hide">
+        <ul className="flex w-full gap-3 overflow-x-auto px-5 py-5 scrollbar-hide sm:px-6">
           {areImagesLoading
             ? Array.from({ length: 3 }, (_, index) => (
                 <li
@@ -139,8 +139,8 @@ export const PointDetail = ({ point, handleClear }: Props) => {
       )}
 
       {point.description && (
-        <div className="px-5 pb-5">
-          <p className="whitespace-pre-wrap text-sm text-gray-600">
+        <div className="mx-5 mb-5 rounded-2xl border border-[#edf1ed] bg-[#f8faf8] px-4 py-4 sm:mx-6 sm:px-5">
+          <p className="whitespace-pre-wrap text-[14px] leading-6 text-[#58675d]">
             {point.description}
           </p>
         </div>
@@ -182,3 +182,4 @@ export const PointDetail = ({ point, handleClear }: Props) => {
     </div>
   );
 };
+

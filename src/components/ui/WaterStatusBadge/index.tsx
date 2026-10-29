@@ -9,8 +9,8 @@ export const WaterStatusBadge = ({ hydrolyzed }: Props) => {
   const label = hydrolyzed ? "Гидролизуется" : "Не гидролизуется";
   return (
     <div
-      className={`w-fit px-2 py-1 flex items-center justify-center gap-1 rounded-sm ${
-        hydrolyzed ? "bg-[#EDF5F0]" : "bg-[#F8F0E7]"
+      className={`w-fit px-2 py-1 flex items-center justify-center gap-1 rounded-full ${
+        hydrolyzed ? "bg-[#eaf4ed]" : "bg-[#f8f0e7]"
       }`}
     >
       <p
@@ -23,3 +23,4 @@ export const WaterStatusBadge = ({ hydrolyzed }: Props) => {
     </div>
   );
 };
+

@@ -14,7 +14,7 @@ export const MapWrapper = ({
   handlePointPress,
 }: Props) => {
   return (
-    <div className="absolute inset-0 h-full w-full overflow-hidden bg-gray-100 sm:bottom-0 sm:left-0 sm:right-[360px] sm:top-[58px] sm:h-auto sm:w-auto">
+    <div className="absolute inset-0 h-full w-full overflow-hidden bg-gray-100">
       <DgisMap
         selectedPointId={selectedPointId}
         points={points}
@@ -23,3 +23,4 @@ export const MapWrapper = ({
     </div>
   );
 };
+

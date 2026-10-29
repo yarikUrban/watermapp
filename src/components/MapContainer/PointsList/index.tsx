@@ -9,7 +9,7 @@ type Props = {
 
 const PointsList = ({ points, handlePointPress }: Props) => {
   return (
-    <div className="flex flex-col w-full overflow-scroll max-h-screen scrollbar-none ">
+    <div className="flex min-h-0 flex-1 flex-col w-full overflow-y-auto overscroll-contain scrollbar-hide">
       {points?.map((elem) => (
         <PointsListElem key={elem.id} item={elem} onPress={handlePointPress} />
       ))}
@@ -18,3 +18,4 @@ const PointsList = ({ points, handlePointPress }: Props) => {
 };
 
 export default PointsList;
+

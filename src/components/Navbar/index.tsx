@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LogIn, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Button, buttonVariants } from "../ui/button";
@@ -9,8 +10,11 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/app/lib/client";
 
 export default function Navbar() {
+  const pathname = usePathname();
   const { user, clearUser } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  if (pathname !== "/" && pathname !== "/map") return null;
 
   const handleLogOut = async () => {
     setIsLoggingOut(true);
@@ -25,9 +29,8 @@ export default function Navbar() {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[200] border-b border-border/60 bg-background/75 backdrop-blur-md">
-      <div className="flex w-full items-center justify-between h-14 gap-3 px-4 sm:px-6">
-        <div></div>
+    <header className="map-header fixed z-[200]">
+      <div className="flex h-10 w-full items-center justify-end gap-2 px-2">
         <div className="flex  items-center gap-4">
           {user ? (
             <>
@@ -55,7 +58,7 @@ export default function Navbar() {
                 title="Войти"
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
-                  "w-fit flex gap-4 px-4 font-medium",
+                  "h-8 w-fit gap-2 rounded-full px-3 text-xs font-medium text-[#385b49] hover:bg-white/60",
                 )}
               >
                 <span className="max-w-[240px] truncate text-sm text-muted-foreground">
@@ -70,3 +73,8 @@ export default function Navbar() {
     </header>
   );
 }
+
+
+
+
+

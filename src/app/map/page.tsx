@@ -1,14 +1,11 @@
-import MapContainer from "@/components/MapContainer";
-import { getPoints } from "../actions/points";
 import { Suspense } from "react";
 import { MapData } from "@/components/MapContainer/MapData";
+import { MapLoader } from "@/components/DgisMap/MapLoader";
 
 export default function HomePage() {
-  const data = getPoints();
-
   return (
     <main>
-      <Suspense fallback={<div>loading...</div>}>
+      <Suspense fallback={<MapLoader />}>
         <MapData />
       </Suspense>
     </main>
